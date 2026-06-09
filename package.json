@@ -1,0 +1,16 @@
+{
+  "name": "students_management_application_system",
+  "version": "1.0.0",
+  "description": "Build a simple CRUD API for student management",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js"
+  },
+  "author": "Joel Hanson",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1",
+    "nodemon": "^3.1.14"
+  }
+}
