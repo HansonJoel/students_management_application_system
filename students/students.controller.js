@@ -38,7 +38,7 @@ const deleteStudentController = async (req, res) => {
 
 const getStudentController = async (req, res) => {
   const { id } = req.params;
-  const response = await studentService.getStudentById(id);
+  const response = await studentService.getStudent(id);
 
   return res.status(response.code).json({
     message: response.message,

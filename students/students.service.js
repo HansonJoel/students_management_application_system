@@ -16,7 +16,7 @@ const createStudent = async ({ name, age, gender }) => {
 };
 
 // The updateStudents function updates an existing student record based on the provided ID and new data
-const updateStudents = async (id, updateData) => {
+const updateStudents = async (id, { name, age, gender }) => {
   const student = await studentsModel.findById(id);
 
   if (!student) {
@@ -27,13 +27,24 @@ const updateStudents = async (id, updateData) => {
     };
   }
 
-  const allowedFields = ["name", "age", "gender"];
+  if (!name && !age && !gender) {
+    return {
+      code: 400,
+      message: "Invalid input: name, age, and gender are required",
+    };
+  }
 
-  allowedFields.forEach((field) => {
-    if (updateData[field] !== undefined) {
-      student[field] = updateData[field];
-    }
-  });
+  if (name) student.name = name;
+  if (age) student.age = age;
+  if (gender) student.gender = gender;
+
+  // const allowedFields = ["name", "age", "gender"];
+
+  // allowedFields.forEach((field) => {
+  //   if (updateData[field] !== undefined) {
+  //     student[field] = updateData[field];
+  //   }
+  // });
 
   await student.save();
 
@@ -48,7 +59,7 @@ const updateStudents = async (id, updateData) => {
 const deleteStudent = async (id) => {
   const student = await studentsModel.deleteOne({ _id: id });
 
-  if (result.deletedCount === 0) {
+  if (!student) {
     return {
       code: 404,
       message: "Student not found",
@@ -65,7 +76,7 @@ const deleteStudent = async (id) => {
 
 // The getStudent function retrieves a student record from the database based on the provided ID
 const getStudent = async (id) => {
-  const student = await studentsModel.findById({ id });
+  const student = await studentsModel.findById(id);
 
   if (!student) {
     return {
@@ -82,7 +93,7 @@ const getStudent = async (id) => {
 };
 
 // The getAllStudent function retrieves all student record from the database
-const getAllStudent = async ({ age, gender, limit, page }) => {
+const getAllStudents = async () => {
   const student = await studentsModel.find({});
 
   return {
@@ -97,5 +108,5 @@ module.exports = {
   updateStudents,
   deleteStudent,
   getStudent,
-  getAllStudent,
+  getAllStudents,
 };
