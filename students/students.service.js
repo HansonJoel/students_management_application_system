@@ -1,0 +1,101 @@
+const studentsModel = require("./students.model");
+
+// Service functions for managing students
+// These functions interact with the studentsModel to perform CRUD operations
+// Each function returns an object containing a status code, a message, and the relevant data
+
+// The createStudent function creates a new student record in the database
+const createStudent = async ({ name, age, gender }) => {
+  const student = await studentsModel.create({ name, age, gender });
+
+  return {
+    code: 201,
+    message: "Student created successfully",
+    data: student,
+  };
+};
+
+// The updateStudents function updates an existing student record based on the provided ID and new data
+const updateStudents = async (id, updateData) => {
+  const student = await studentsModel.findById(id);
+
+  if (!student) {
+    return {
+      code: 404,
+      message: "Student not found",
+      data: null,
+    };
+  }
+
+  const allowedFields = ["name", "age", "gender"];
+
+  allowedFields.forEach((field) => {
+    if (updateData[field] !== undefined) {
+      student[field] = updateData[field];
+    }
+  });
+
+  await student.save();
+
+  return {
+    code: 200,
+    message: "Student updated successfully",
+    data: student,
+  };
+};
+
+// The deleteStudent function deletes a student record from the database based on the provided ID
+const deleteStudent = async (id) => {
+  const student = await studentsModel.deleteOne({ _id: id });
+
+  if (result.deletedCount === 0) {
+    return {
+      code: 404,
+      message: "Student not found",
+      data: null,
+    };
+  }
+
+  return {
+    code: 200,
+    message: "Student deleted successfully",
+    data: null,
+  };
+};
+
+// The getStudent function retrieves a student record from the database based on the provided ID
+const getStudent = async (id) => {
+  const student = await studentsModel.findById({ id });
+
+  if (!student) {
+    return {
+      code: 404,
+      message: "Student not found",
+    };
+  }
+
+  return {
+    code: 200,
+    message: "Student retrieved Successfully",
+    data: student,
+  };
+};
+
+// The getAllStudent function retrieves all student record from the database
+const getAllStudent = async ({ age, gender, limit, page }) => {
+  const student = await studentsModel.find({});
+
+  return {
+    code: 200,
+    message: "Students retrieved Successfully",
+    data: student,
+  };
+};
+
+module.exports = {
+  createStudent,
+  updateStudents,
+  deleteStudent,
+  getStudent,
+  getAllStudent,
+};
