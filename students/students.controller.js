@@ -47,7 +47,7 @@ const getStudentController = async (req, res) => {
 };
 
 const getAllStudentsController = async (req, res) => {
-  const response = await studentService.getAllStudents();
+  const response = await studentService.getAllStudents(req.query);
 
   return res.status(response.code).json({
     message: response.message,

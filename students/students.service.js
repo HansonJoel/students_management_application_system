@@ -93,13 +93,31 @@ const getStudent = async (id) => {
 };
 
 // The getAllStudent function retrieves all student record from the database
-const getAllStudents = async () => {
-  const student = await studentsModel.find({});
+const getAllStudents = async ({ name, age, gender, limit = 10, page = 1 } ={}) => {
+  // builder pattern, build query
+  const query = {};
+
+  if (name) query.name = name;
+  if (age) query.age = age;
+  if (gender) query.gender = gender;
+
+  // pagination
+  const skip = (page - 1) * limit;
+
+  const student = await studentsModel.find(query).skip(skip).limit(limit);
+  const total = await studentsModel.countDocuments(query);
 
   return {
     code: 200,
     message: "Students retrieved Successfully",
-    data: student,
+    data: { student, 
+      pagination: { 
+        total, 
+        page: Number(page), 
+        limit: Number(limit), 
+        totalPages: Math.ceil(total / limit),
+      }
+    },
   };
 };
 
