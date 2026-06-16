@@ -1,8 +1,10 @@
 const express = require("express");
+const morgan = require("morgan");
 const app = express();
 const studentRouter = require("./students/students.routes");
 
 // Middleware for parsing JSON bodies (highly recommended for POST/PATCH)
+app.use(morgan("dev"));
 app.use(express.json());
 
 app.get("/", (req, res) => {
