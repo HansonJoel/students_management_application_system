@@ -5,8 +5,28 @@ const studentsModel = require("./students.model");
 // Each function returns an object containing a status code, a message, and the relevant data
 
 // The createStudent function creates a new student record in the database
-const createStudent = async ({ name, age, gender }) => {
-  const student = await studentsModel.create({ name, age, gender });
+const createStudent = async ({
+  firstName,
+  lastName,
+  email,
+  phone,
+  dateOfBirth,
+  gender,
+  department,
+  level,
+  studentId,
+}) => {
+  const student = await studentsModel.create({
+    firstName,
+    lastName,
+    email,
+    phone,
+    dateOfBirth,
+    gender,
+    department,
+    level,
+    studentId,
+  });
 
   return {
     code: 201,
@@ -16,7 +36,7 @@ const createStudent = async ({ name, age, gender }) => {
 };
 
 // The updateStudents function updates an existing student record based on the provided ID and new data
-const updateStudents = async (id, { name, age, gender }) => {
+const updateStudents = async (id, updateData) => {
   const student = await studentsModel.findById(id);
 
   if (!student) {
@@ -27,24 +47,23 @@ const updateStudents = async (id, { name, age, gender }) => {
     };
   }
 
-  if (!name && !age && !gender) {
-    return {
-      code: 400,
-      message: "Invalid input: name, age, and gender are required",
-    };
-  }
+  const allowedFields = [
+    "firstName",
+    "lastName",
+    "email",
+    "phone",
+    "dateOfBirth",
+    "gender",
+    "department",
+    "level",
+    "studentId",
+  ];
 
-  if (name) student.name = name;
-  if (age) student.age = age;
-  if (gender) student.gender = gender;
-
-  // const allowedFields = ["name", "age", "gender"];
-
-  // allowedFields.forEach((field) => {
-  //   if (updateData[field] !== undefined) {
-  //     student[field] = updateData[field];
-  //   }
-  // });
+  allowedFields.forEach((field) => {
+    if (updateData[field] !== undefined) {
+      student[field] = updateData[field];
+    }
+  });
 
   await student.save();
 
@@ -92,34 +111,65 @@ const getStudent = async (id) => {
   };
 };
 
-// The getAllStudent function retrieves all student record from the database
+// The getAllStudents function retrieves all student records
 const getAllStudents = async ({
-  name,
-  age,
+  firstName,
+  lastName,
+  email,
   gender,
+  department,
+  level,
   limit = 10,
   page = 1,
 } = {}) => {
-  // builder pattern, build query
+  // Query builder pattern
   const query = {};
 
-  if (name) {
-    query.name = { $regex: name, $options: "i" };
+  if (firstName) {
+    query.firstName = {
+      $regex: firstName,
+      $options: "i",
+    };
   }
-  if (age) query.age = age;
-  if (gender) query.gender = gender;
 
-  // pagination
+  if (lastName) {
+    query.lastName = {
+      $regex: lastName,
+      $options: "i",
+    };
+  }
+
+  if (email) {
+    query.email = email;
+  }
+
+  if (gender) {
+    query.gender = gender;
+  }
+
+  if (department) {
+    query.department = department;
+  }
+
+  if (level) {
+    query.level = level;
+  }
+
+  // Pagination
   const skip = (page - 1) * limit;
 
-  const student = await studentsModel.find(query).skip(skip).limit(limit);
+  const students = await studentsModel
+    .find(query)
+    .skip(skip)
+    .limit(Number(limit));
+
   const total = await studentsModel.countDocuments(query);
 
   return {
     code: 200,
-    message: "Students retrieved Successfully",
+    message: "Students retrieved successfully",
     data: {
-      student,
+      students,
       pagination: {
         total,
         page: Number(page),

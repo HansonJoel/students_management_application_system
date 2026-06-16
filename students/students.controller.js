@@ -1,13 +1,8 @@
 const studentService = require("./students.service");
 
+// CREATE STUDENT
 const createStudentController = async (req, res) => {
-  const bodyOfRequest = req.body;
-
-  const response = await studentService.createStudent({
-    name: bodyOfRequest.name,
-    age: bodyOfRequest.age,
-    gender: bodyOfRequest.gender,
-  });
+  const response = await studentService.createStudent(req.body);
 
   return res.status(response.code).json({
     message: response.message,
@@ -15,6 +10,7 @@ const createStudentController = async (req, res) => {
   });
 };
 
+// UPDATE STUDENT
 const updateStudentController = async (req, res) => {
   const { id } = req.params;
 
@@ -46,6 +42,7 @@ const getStudentController = async (req, res) => {
   });
 };
 
+// GET ALL STUDENTS
 const getAllStudentsController = async (req, res) => {
   const response = await studentService.getAllStudents(req.query);
 
