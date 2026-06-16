@@ -10,6 +10,16 @@ const createStudentController = async (req, res) => {
   });
 };
 
+// CREATE BULK STUDENTS
+const createBulkStudentsController = async (req, res) => {
+  const response = await studentService.createBulkStudents(req.body);
+
+  return res.status(response.code).json({
+    message: response.message,
+    data: response.data,
+  });
+};
+
 // UPDATE STUDENT
 const updateStudentController = async (req, res) => {
   const { id } = req.params;
@@ -54,6 +64,7 @@ const getAllStudentsController = async (req, res) => {
 
 module.exports = {
   createStudentController,
+  createBulkStudentsController,
   updateStudentController,
   deleteStudentController,
   getStudentController,

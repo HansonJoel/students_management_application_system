@@ -35,6 +35,17 @@ const createStudent = async ({
   };
 };
 
+// Bulk create students function to create multiple student records at once
+const createBulkStudents = async (students) => {
+  const createdStudents = await studentsModel.insertMany(students);
+
+  return {
+    code: 201,
+    message: "Students created successfully",
+    data: createdStudents,
+  };
+};
+
 // The updateStudents function updates an existing student record based on the provided ID and new data
 const updateStudents = async (id, updateData) => {
   const student = await studentsModel.findById(id);
@@ -182,6 +193,7 @@ const getAllStudents = async ({
 
 module.exports = {
   createStudent,
+  createBulkStudents,
   updateStudents,
   deleteStudent,
   getStudent,
