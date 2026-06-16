@@ -93,11 +93,19 @@ const getStudent = async (id) => {
 };
 
 // The getAllStudent function retrieves all student record from the database
-const getAllStudents = async ({ name, age, gender, limit = 10, page = 1 } ={}) => {
+const getAllStudents = async ({
+  name,
+  age,
+  gender,
+  limit = 10,
+  page = 1,
+} = {}) => {
   // builder pattern, build query
   const query = {};
 
-  if (name) query.name = name;
+  if (name) {
+    query.name = { $regex: name, $options: "i" };
+  }
   if (age) query.age = age;
   if (gender) query.gender = gender;
 
@@ -110,13 +118,14 @@ const getAllStudents = async ({ name, age, gender, limit = 10, page = 1 } ={}) =
   return {
     code: 200,
     message: "Students retrieved Successfully",
-    data: { student, 
-      pagination: { 
-        total, 
-        page: Number(page), 
-        limit: Number(limit), 
+    data: {
+      student,
+      pagination: {
+        total,
+        page: Number(page),
+        limit: Number(limit),
         totalPages: Math.ceil(total / limit),
-      }
+      },
     },
   };
 };
