@@ -1,5 +1,5 @@
 const studentsModel = require("./students.model");
-
+const AppError = require("../utils/AppError");
 // Service functions for managing students
 // These functions interact with the studentsModel to perform CRUD operations
 // Each function returns an object containing a status code, a message, and the relevant data
@@ -28,34 +28,22 @@ const createStudent = async ({
     studentId,
   });
 
-  return {
-    code: 201,
-    message: "Student created successfully",
-    data: student,
-  };
+  return student;
 };
 
 // Bulk create students function to create multiple student records at once
 const createBulkStudents = async (students) => {
   const createdStudents = await studentsModel.insertMany(students);
 
-  return {
-    code: 201,
-    message: "Students created successfully",
-    data: createdStudents,
-  };
+  return createdStudents;
 };
 
-// The updateStudents function updates an existing student record based on the provided ID and new data
-const updateStudents = async (id, updateData) => {
+// The updateStudent function updates an existing student record based on the provided ID and new data
+const updateStudent = async (id, updateData) => {
   const student = await studentsModel.findById(id);
 
   if (!student) {
-    return {
-      code: 404,
-      message: "Student not found",
-      data: null,
-    };
+    throw new AppError("Student not found", 404);
   }
 
   const allowedFields = [
@@ -78,30 +66,18 @@ const updateStudents = async (id, updateData) => {
 
   await student.save();
 
-  return {
-    code: 200,
-    message: "Student updated successfully",
-    data: student,
-  };
+  return student;
 };
 
 // The deleteStudent function deletes a student record from the database based on the provided ID
 const deleteStudent = async (id) => {
-  const student = await studentsModel.deleteOne({ _id: id });
+  const student = await studentsModel.findByIdAndDelete(id);
 
   if (!student) {
-    return {
-      code: 404,
-      message: "Student not found",
-      data: null,
-    };
+    throw new AppError("Student not found", 404);
   }
 
-  return {
-    code: 200,
-    message: "Student deleted successfully",
-    data: null,
-  };
+  return student;
 };
 
 // The getStudent function retrieves a student record from the database based on the provided ID
@@ -109,17 +85,10 @@ const getStudent = async (id) => {
   const student = await studentsModel.findById(id);
 
   if (!student) {
-    return {
-      code: 404,
-      message: "Student not found",
-    };
+    throw new AppError("Student not found", 404);
   }
 
-  return {
-    code: 200,
-    message: "Student retrieved Successfully",
-    data: student,
-  };
+  return student;
 };
 
 // The getAllStudents function retrieves all student records
@@ -133,6 +102,10 @@ const getAllStudents = async ({
   limit = 10,
   page = 1,
 } = {}) => {
+  // Convert pagination values to numbers and validate them
+  page = Math.max(1, Number(page) || 1);
+  limit = Math.max(1, Number(limit) || 10);
+
   // Query builder pattern
   const query = {};
 
@@ -169,32 +142,32 @@ const getAllStudents = async ({
   // Pagination
   const skip = (page - 1) * limit;
 
+  // Retrieve students
   const students = await studentsModel
     .find(query)
+    .sort({ createdAt: -1 }) // newest first
     .skip(skip)
-    .limit(Number(limit));
+    .limit(limit);
 
+  // Count matching documents
   const total = await studentsModel.countDocuments(query);
 
   return {
-    code: 200,
-    message: "Students retrieved successfully",
-    data: {
-      students,
-      pagination: {
-        total,
-        page: Number(page),
-        limit: Number(limit),
-        totalPages: Math.ceil(total / limit),
-      },
+    students,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+      hasNextPage: page < Math.ceil(total / limit),
+      hasPrevPage: page > 1,
     },
   };
 };
-
 module.exports = {
   createStudent,
   createBulkStudents,
-  updateStudents,
+  updateStudent,
   deleteStudent,
   getStudent,
   getAllStudents,

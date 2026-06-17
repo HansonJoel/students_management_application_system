@@ -3,11 +3,11 @@ const studentService = require("./students.service");
 // CREATE STUDENT
 const createStudentController = async (req, res, next) => {
   try {
-    const response = await studentService.createStudent(req.body);
+    const student = await studentService.createStudent(req.body);
 
-    return res.status(response.code).json({
-      message: response.message,
-      data: response.data,
+    return res.status(201).json({
+      message: "Student created Successfully",
+      data: student,
     });
   } catch (error) {
     next(error);
@@ -17,11 +17,11 @@ const createStudentController = async (req, res, next) => {
 // CREATE BULK STUDENTS
 const createBulkStudentsController = async (req, res, next) => {
   try {
-    const response = await studentService.createBulkStudents(req.body);
+    const students = await studentService.createBulkStudents(req.body);
 
-    return res.status(response.code).json({
-      message: response.message,
-      data: response.data,
+    return res.status(201).json({
+      message: "Students created Successfully",
+      data: students,
     });
   } catch (error) {
     next(error);
@@ -32,11 +32,11 @@ const createBulkStudentsController = async (req, res, next) => {
 const updateStudentController = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const response = await studentService.updateStudents(id, req.body);
+    const student = await studentService.updateStudent(id, req.body);
 
-    return res.status(response.code).json({
-      message: response.message,
-      data: response.data,
+    return res.status(200).json({
+      message: "Student updated successfully",
+      data: student,
     });
   } catch (error) {
     next(error);
@@ -46,11 +46,11 @@ const updateStudentController = async (req, res, next) => {
 const deleteStudentController = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const response = await studentService.deleteStudent(id);
+    const student = await studentService.deleteStudent(id);
 
-    return res.status(response.code).json({
-      message: response.message,
-      data: response.data,
+    return res.status(200).json({
+      message: "Student deleted successfully",
+      // data: student,
     });
   } catch (error) {
     next(error);
@@ -60,11 +60,11 @@ const deleteStudentController = async (req, res, next) => {
 const getStudentController = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const response = await studentService.getStudent(id);
+    const student = await studentService.getStudent(id);
 
-    return res.status(response.code).json({
-      message: response.message,
-      data: response.data,
+    return res.status(200).json({
+      message: "Student retrieved successfully",
+      data: student,
     });
   } catch (error) {
     next(error);
@@ -74,11 +74,11 @@ const getStudentController = async (req, res, next) => {
 // GET ALL STUDENTS
 const getAllStudentsController = async (req, res, next) => {
   try {
-    const response = await studentService.getAllStudents(req.query);
+    const data = await studentService.getAllStudents(req.query);
 
-    return res.status(response.code).json({
-      message: response.message,
-      data: response.data,
+    return res.status(200).json({
+      message: "Students retrieved successfully",
+      data: data,
     });
   } catch (error) {
     next(error);
