@@ -3,7 +3,8 @@ const morgan = require("morgan");
 const app = express();
 
 const studentRouter = require("./students/students.routes");
-const errorMiddlware = require("./middleware/error.middleware");
+const AppError = require("./utils/AppError");
+const errorMiddleware = require("./middleware/error.middleware");
 
 // Middleware for parsing JSON bodies (highly recommended for POST/PATCH)
 app.use(morgan("dev"));
@@ -15,6 +16,11 @@ app.get("/", (req, res) => {
 
 //  register routes
 app.use("/v1/students", studentRouter);
+
+// Unmatched routes
+app.use((req, res, next) => {
+  next(new AppError(`Cannot find ${req.originalUrl} on this server`, 404));
+});
 
 // Global Error Middleware
 app.use(errorMiddleware);
