@@ -1,5 +1,35 @@
 const AppError = require("../utils/AppError");
 
+// ===============================
+// Development Error Response
+// ===============================
+const devError = (res, error) => {
+  res.status(error.statusCode || 500).json({
+    status: error.status || "error",
+    message: error.message,
+    stack: error.stack,
+    error,
+  });
+};
+
+// ===============================
+// Production Error Response
+// ===============================
+const prodErrors = (res, error) => {
+  if (error.isOperational) {
+    return res.status(error.statusCode).json({
+      status: error.status,
+      message: error.message,
+    });
+  } else {
+    console.error("ERROR", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Something went wrong. Please try again later.",
+    });
+  }
+};
+
 // Handling cast Errors
 const handleCastError = (error) => {
   const errorMessage = `Invalid value '${error.value}' for property '${error.path}'.`;
@@ -14,7 +44,7 @@ const handleDuplicateKeyError = (error) => {
 
   const errorMessage = `A document with field '${field}' and value '${value}' already exists.`;
 
-  return new AppError(errorMessage, 400);
+  return new AppError(errorMessage, 409);
 };
 
 // Handle Mongoose Validation Errors
@@ -28,7 +58,7 @@ const handleValidationError = (error) => {
 
 // Handling Global Error
 const errorMiddleware = (err, req, res, next) => {
-  let error = { ...err };
+  let error = err;
   error.message = err.message;
 
   // Invalid MongoDB ObjectId
@@ -50,10 +80,11 @@ const errorMiddleware = (err, req, res, next) => {
   error.statusCode = error.statusCode || 500;
   error.status = error.status || "error";
 
-  return res.status(error.statusCode).json({
-    status: error.status,
-    message: error.message,
-  });
+  if (process.env.NODE_ENV === "development") {
+    return devError(res, error);
+  } else {
+    return prodErrors(res, error);
+  }
 };
 
 module.exports = errorMiddleware;
