@@ -13,10 +13,13 @@ const validateCreateStudents = (req, res, next) => {
     studentId: Joi.string().required(),
   });
 
-  const { error } = schema.validate(req.body);
+  const { error } = schema.validate(req.body, {
+    // this allows to show all the errors at once rather than one by one
+    abortEarly: false,
+  });
   if (error) {
     return res.status(400).json({
-      code: 400,
+      status: "fail",
       message: error.message,
     });
   }
@@ -50,7 +53,7 @@ const validateBulkCreateStudents = (req, res, next) => {
   const { error } = schema.validate(req.body);
   if (error) {
     return res.status(400).json({
-      code: 400,
+      status: "fail",
       message: error.message,
     });
   }
