@@ -1,4 +1,5 @@
 const studentsModel = require("./students.model");
+const generateStudentId = require("../utils/generateStudentId");
 const AppError = require("../utils/AppError");
 // Service functions for managing students
 // These functions interact with the studentsModel to perform CRUD operations
@@ -14,8 +15,10 @@ const createStudent = async ({
   gender,
   department,
   level,
-  studentId,
+  password,
 }) => {
+  const studentId = await generateStudentId(department);
+
   const student = await studentsModel.create({
     firstName,
     lastName,
@@ -25,6 +28,7 @@ const createStudent = async ({
     gender,
     department,
     level,
+    password,
     studentId,
   });
 
@@ -33,9 +37,14 @@ const createStudent = async ({
 
 // Bulk create students function to create multiple student records at once
 const createBulkStudents = async (students) => {
-  const createdStudents = await studentsModel.insertMany(students);
+  const studentsWithIds = await Promise.all(
+    students.map(async (student) => ({
+      ...student,
+      studentId: await generateStudentId(student.department),
+    })),
+  );
 
-  return createdStudents;
+  return await studentsModel.insertMany(studentsWithIds);
 };
 
 // The updateStudent function updates an existing student record based on the provided ID and new data
@@ -55,7 +64,6 @@ const updateStudent = async (id, updateData) => {
     "gender",
     "department",
     "level",
-    "studentId",
   ];
 
   allowedFields.forEach((field) => {

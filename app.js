@@ -2,9 +2,10 @@ const express = require("express");
 const morgan = require("morgan");
 const app = express();
 
-const studentRouter = require("./students/students.routes");
-const AppError = require("./utils/AppError");
 const errorMiddleware = require("./middleware/error.middleware");
+const AppError = require("./utils/AppError");
+const studentRouter = require("./students/students.routes");
+const authRouter = require("./auth/auth.route");
 
 // Middleware for parsing JSON bodies (highly recommended for POST/PATCH)
 app.use(morgan("dev"));
@@ -16,6 +17,7 @@ app.get("/", (req, res) => {
 
 //  register routes
 app.use("/v1/students", studentRouter);
+app.use("/v1/auth", authRouter);
 
 // Unmatched routes
 app.use((req, res, next) => {

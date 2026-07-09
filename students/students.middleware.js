@@ -1,28 +1,40 @@
+const departmentCodes = require("../config/departments");
 const Joi = require("joi");
 
 const validateCreateStudents = (req, res, next) => {
   const schema = Joi.object({
     firstName: Joi.string().trim().required(),
+
     lastName: Joi.string().trim().required(),
-    email: Joi.string().email().required(),
-    phone: Joi.string().required(),
+
+    email: Joi.string().email().trim().lowercase().required(),
+
+    phone: Joi.string().trim().required(),
+
     dateOfBirth: Joi.date().required(),
+
     gender: Joi.string().valid("male", "female").required(),
-    department: Joi.string().required(),
+
+    department: Joi.string()
+      .valid(...Object.keys(departmentCodes))
+      .required(),
+
     level: Joi.string().valid("100", "200", "300", "400", "500").required(),
-    studentId: Joi.string().required(),
+
+    password: Joi.string().min(8).required(),
   });
 
   const { error } = schema.validate(req.body, {
-    // this allows to show all the errors at once rather than one by one
     abortEarly: false,
   });
+
   if (error) {
     return res.status(400).json({
       status: "fail",
-      message: error.message,
+      message: error.details.map((err) => err.message).join(". "),
     });
   }
+
   next();
 };
 
@@ -34,27 +46,32 @@ const validateBulkCreateStudents = (req, res, next) => {
 
       lastName: Joi.string().trim().required(),
 
-      email: Joi.string().email().required(),
+      email: Joi.string().email().trim().lowercase().required(),
 
-      phone: Joi.string().required(),
+      phone: Joi.string().trim().required(),
 
       dateOfBirth: Joi.date().required(),
 
       gender: Joi.string().valid("male", "female").required(),
 
-      department: Joi.string().required(),
+      department: Joi.string()
+        .valid(...Object.keys(departmentCodes))
+        .required(),
 
       level: Joi.string().valid("100", "200", "300", "400", "500").required(),
 
-      studentId: Joi.string().required(),
+      password: Joi.string().min(8).required(),
     }),
   );
 
-  const { error } = schema.validate(req.body);
+  const { error } = schema.validate(req.body, {
+    abortEarly: false,
+  });
+
   if (error) {
     return res.status(400).json({
       status: "fail",
-      message: error.message,
+      message: error.details.map((err) => err.message).join(". "),
     });
   }
 

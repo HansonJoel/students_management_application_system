@@ -1,3 +1,4 @@
+const departmentCodes = require("../config/departments");
 const mongoose = require("mongoose");
 
 const studentSchema = new mongoose.Schema(
@@ -43,8 +44,7 @@ const studentSchema = new mongoose.Schema(
 
     department: {
       type: String,
-      required: true,
-      trim: true,
+      enum: Object.keys(departmentCodes),
     },
 
     level: {
@@ -55,9 +55,29 @@ const studentSchema = new mongoose.Schema(
 
     studentId: {
       type: String,
-      required: true,
       unique: true,
       trim: true,
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 8,
+      select: false,
+    },
+
+    role: {
+      type: String,
+      enum: ["student", "admin"],
+      default: "student",
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+
+    lastLogin: {
+      type: Date,
     },
   },
   {
