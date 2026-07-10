@@ -3,7 +3,7 @@ const catchAsync = require("../utils/catchAsync");
 
 // CREATE STUDENT
 const createStudentController = catchAsync(async (req, res, next) => {
-  const student = await studentService.createStudent(req.body);
+  const student = await studentService.createStudentByAdmin(req.body);
 
   return res.status(201).json({
     message: "Student created Successfully",
@@ -32,6 +32,7 @@ const updateStudentController = catchAsync(async (req, res, next) => {
   });
 });
 
+// Delete student
 const deleteStudentController = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const student = await studentService.deleteStudent(id);
@@ -42,6 +43,7 @@ const deleteStudentController = catchAsync(async (req, res, next) => {
   });
 });
 
+// Get single student
 const getStudentController = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const student = await studentService.getStudent(id);
@@ -54,11 +56,11 @@ const getStudentController = catchAsync(async (req, res, next) => {
 
 // GET ALL STUDENTS
 const getAllStudentsController = catchAsync(async (req, res, next) => {
-  const data = await studentService.getAllStudents(req.query);
+  const students = await studentService.getAllStudents(req.query);
 
   return res.status(200).json({
     message: "Students retrieved successfully",
-    data: data,
+    data: students,
   });
 });
 

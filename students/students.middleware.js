@@ -21,7 +21,21 @@ const validateCreateStudents = (req, res, next) => {
 
     level: Joi.string().valid("100", "200", "300", "400", "500").required(),
 
-    password: Joi.string().min(8).required(),
+    password: Joi.string()
+      .min(8)
+      .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/)
+      .required()
+      .messages({
+        "string.pattern.base":
+          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
+      }),
+
+    confirmPassword: Joi.string()
+      .valid(Joi.ref("password"))
+      .required()
+      .messages({
+        "any.only": "Passwords do not match",
+      }),
   });
 
   const { error } = schema.validate(req.body, {
@@ -60,7 +74,21 @@ const validateBulkCreateStudents = (req, res, next) => {
 
       level: Joi.string().valid("100", "200", "300", "400", "500").required(),
 
-      password: Joi.string().min(8).required(),
+      password: Joi.string()
+        .min(8)
+        .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/)
+        .required()
+        .messages({
+          "string.pattern.base":
+            "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
+        }),
+
+      confirmPassword: Joi.string()
+        .required()
+        .valid(Joi.ref("password"))
+        .messages({
+          "any.only": "Passwords do not match",
+        }),
     }),
   );
 

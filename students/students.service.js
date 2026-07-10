@@ -16,6 +16,7 @@ const createStudent = async ({
   department,
   level,
   password,
+  confirmPassword,
 }) => {
   const studentId = await generateStudentId(department);
 
@@ -35,12 +36,50 @@ const createStudent = async ({
   return student;
 };
 
-// Bulk create students function to create multiple student records at once
+// ===============================
+// Create Student (Admin)
+// ===============================
+const createStudentByAdmin = async ({
+  firstName,
+  lastName,
+  email,
+  phone,
+  dateOfBirth,
+  gender,
+  department,
+  level,
+  password,
+  confirmPassword,
+}) => {
+  const studentId = await generateStudentId(department);
+
+  const student = await studentsModel.create({
+    firstName,
+    lastName,
+    email,
+    phone,
+    dateOfBirth,
+    gender,
+    department,
+    level,
+    studentId,
+    password,
+    confirmPassword,
+    role: "student",
+  });
+
+  return student;
+};
+
+// ===============================
+// Bulk Create Students (Admin)
+// ===============================
 const createBulkStudents = async (students) => {
   const studentsWithIds = await Promise.all(
     students.map(async (student) => ({
       ...student,
       studentId: await generateStudentId(student.department),
+      role: "student",
     })),
   );
 
@@ -174,6 +213,7 @@ const getAllStudents = async ({
 };
 module.exports = {
   createStudent,
+  createStudentByAdmin,
   createBulkStudents,
   updateStudent,
   deleteStudent,

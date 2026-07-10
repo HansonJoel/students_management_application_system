@@ -1,5 +1,6 @@
-const departmentCodes = require("../config/departments");
 const mongoose = require("mongoose");
+const departmentCodes = require("../config/departments");
+const bcrypt = require("bcryptjs");
 
 const studentSchema = new mongoose.Schema(
   {
@@ -84,5 +85,15 @@ const studentSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
+
+// Hashing the password before saving it to the database
+studentSchema.pre("save", async function () {
+  // skip hashing if password is not modified
+  if (!this.isModified("password")) return;
+
+  // hashing the password before saving it to the database
+  const saltRounds = Number(process.env.BCRYPT_SALT) || 12;
+  this.password = await bcrypt.hash(this.password, saltRounds);
+});
 
 module.exports = mongoose.model("Student", studentSchema);

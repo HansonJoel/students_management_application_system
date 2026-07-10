@@ -1,4 +1,5 @@
 const studentsModel = require("../students/students.model");
+const generateStudentId = require("../utils/generateStudentId");
 const AppError = require("../utils/AppError");
 
 const signup = async ({
@@ -10,10 +11,11 @@ const signup = async ({
   gender,
   department,
   level,
-  studentId,
   password,
+  confirmPassword,
 }) => {
-  const auth = new studentsModel.create({
+  const studentId = await generateStudentId(department);
+  const auth = await studentsModel.create({
     firstName,
     lastName,
     email,
@@ -23,7 +25,7 @@ const signup = async ({
     department,
     level,
     studentId,
-    password, // plain password for now
+    password,
   });
 
   return auth;
@@ -31,21 +33,18 @@ const signup = async ({
 
 const login = async (data) => {
   const { email, password } = data;
-  const auth = await studentsModel.findOne({ email });
+  const auth = await studentsModel.findOne({ email }).select("+password");
   // check if email/password provided
   if (!email || email === "") {
-    const error = new AppError("Email is not Provided", 400);
-    return error;
+    throw new AppError("Email is not provided", 400);
   }
 
   if (!password || password === "") {
-    const error = new AppError("Password is not Provided", 400);
-    return error;
+    throw new AppError("Password is not provided", 400);
   }
 
   if (!auth) {
-    const error = new AppError("Invalid email or password", 401);
-    return error;
+    throw new AppError("Invalid email or password", 401);
   }
   return auth;
 };
