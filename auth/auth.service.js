@@ -1,52 +1,65 @@
+const studentService = require("../students/students.service");
 const studentsModel = require("../students/students.model");
-const generateStudentId = require("../utils/generateStudentId");
+const generateToken = require("../utils/generateToken");
 const AppError = require("../utils/AppError");
+const bcrypt = require("bcryptjs");
 
-const signup = async ({
-  firstName,
-  lastName,
-  email,
-  phone,
-  dateOfBirth,
-  gender,
-  department,
-  level,
-  password,
-  confirmPassword,
-}) => {
-  const studentId = await generateStudentId(department);
-  const auth = await studentsModel.create({
-    firstName,
-    lastName,
-    email,
-    phone,
-    dateOfBirth,
-    gender,
-    department,
-    level,
-    studentId,
-    password,
-  });
+// The signup function creates a new student and generates a JWT token for authentication
+const signup = async (data) => {
+  // Check if email already exists
+  const existingStudent = await studentsModel.findOne({ email: data.email });
 
-  return auth;
+  if (existingStudent) {
+    throw new AppError("Email already exists", 409);
+  }
+
+  const student = await studentService.createStudent(data);
+
+  const token = generateToken(student._id, student.role);
+
+  student.password = undefined;
+
+  return {
+    student,
+    token,
+  };
 };
 
-const login = async (data) => {
-  const { email, password } = data;
-  const auth = await studentsModel.findOne({ email }).select("+password");
-  // check if email/password provided
+// The login function authenticates a user based on the provided email and password
+const login = async ({ email, password }) => {
   if (!email || email === "") {
-    throw new AppError("Email is not provided", 400);
+    throw new AppError("Email is required", 400);
   }
 
   if (!password || password === "") {
-    throw new AppError("Password is not provided", 400);
+    throw new AppError("Password is required", 400);
   }
 
-  if (!auth) {
+  // check if the user exists in the database and select the password field for comparison
+  const student = await studentsModel.findOne({ email }).select("+password");
+
+  if (!student) {
     throw new AppError("Invalid email or password", 401);
   }
-  return auth;
+
+  // Check if the provided password matches the stored hashed password
+  const isPasswordCorrect = await student.comparePassword(password);
+
+  if (!isPasswordCorrect) {
+    throw new AppError("Password is not correct", 401);
+  }
+
+  student.lastLogin = new Date();
+  await student.save({ validateBeforeSave: false });
+
+  student.password = undefined;
+
+  const token = generateToken(student._id, student.role);
+
+  return {
+    student,
+    token,
+  };
 };
 
 module.exports = {

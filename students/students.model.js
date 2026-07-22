@@ -22,8 +22,10 @@ const studentSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      index: true,
       trim: true,
       lowercase: true,
+      required: [true, "Email is required"],
     },
 
     phone: {
@@ -80,6 +82,7 @@ const studentSchema = new mongoose.Schema(
     lastLogin: {
       type: Date,
     },
+    passwordChangedAt: Date,
   },
   {
     timestamps: true,
@@ -95,5 +98,29 @@ studentSchema.pre("save", async function () {
   const saltRounds = Number(process.env.BCRYPT_SALT) || 12;
   this.password = await bcrypt.hash(this.password, saltRounds);
 });
+
+// Middleware to filter out inactive users from query results
+studentSchema.pre(/^find/, async function () {
+  this.find({ isActive: true });
+});
+
+// Method to compare the provided password with the stored hashed password
+studentSchema.methods.comparePassword = async function (candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
+};
+
+// Method to check if the password has been changed after the token was issued
+studentSchema.methods.isPasswordChanged = function (tokenIssuedAt) {
+  if (this.passwordChangedAt) {
+    const changedTimestamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10,
+    );
+
+    return tokenIssuedAt < changedTimestamp;
+  }
+
+  return false;
+};
 
 module.exports = mongoose.model("Student", studentSchema);

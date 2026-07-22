@@ -16,41 +16,14 @@ const createStudent = async ({
   department,
   level,
   password,
-  confirmPassword,
 }) => {
-  const studentId = await generateStudentId(department);
+  // Check if email already exists
+  const existingStudent = await studentsModel.findOne({ email });
 
-  const student = await studentsModel.create({
-    firstName,
-    lastName,
-    email,
-    phone,
-    dateOfBirth,
-    gender,
-    department,
-    level,
-    password,
-    studentId,
-  });
-
-  return student;
-};
-
-// ===============================
-// Create Student (Admin)
-// ===============================
-const createStudentByAdmin = async ({
-  firstName,
-  lastName,
-  email,
-  phone,
-  dateOfBirth,
-  gender,
-  department,
-  level,
-  password,
-  confirmPassword,
-}) => {
+  if (existingStudent) {
+    throw new AppError("Email already exists", 409);
+  }
+  // Generate student ID based on department and current year
   const studentId = await generateStudentId(department);
 
   const student = await studentsModel.create({
@@ -64,8 +37,6 @@ const createStudentByAdmin = async ({
     level,
     studentId,
     password,
-    confirmPassword,
-    role: "student",
   });
 
   return student;
@@ -97,7 +68,6 @@ const updateStudent = async (id, updateData) => {
   const allowedFields = [
     "firstName",
     "lastName",
-    "email",
     "phone",
     "dateOfBirth",
     "gender",
@@ -213,7 +183,6 @@ const getAllStudents = async ({
 };
 module.exports = {
   createStudent,
-  createStudentByAdmin,
   createBulkStudents,
   updateStudent,
   deleteStudent,

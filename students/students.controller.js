@@ -3,7 +3,7 @@ const catchAsync = require("../utils/catchAsync");
 
 // CREATE STUDENT
 const createStudentController = catchAsync(async (req, res, next) => {
-  const student = await studentService.createStudentByAdmin(req.body);
+  const student = await studentService.createStudent(req.body);
 
   return res.status(201).json({
     message: "Student created Successfully",

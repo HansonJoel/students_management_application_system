@@ -12,7 +12,7 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("Welcome to the Students Management Application System!");
+  res.send("Welcome to the School Management Application System!");
 });
 
 //  register routes

@@ -34,7 +34,9 @@ const validateCreateStudents = (req, res, next) => {
       .valid(Joi.ref("password"))
       .required()
       .messages({
-        "any.only": "Passwords do not match",
+        "any.only": "Passwords do not match.",
+        "string.empty": "Please confirm your password.",
+        "any.required": "Confirm password is required.",
       }),
   });
 

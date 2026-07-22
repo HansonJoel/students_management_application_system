@@ -39,6 +39,14 @@ const handleCastError = (error) => {
 
 // Handling duplicate key errors
 const handleDuplicateKeyError = (error) => {
+  // Sometimes keyValue may not be available
+  if (!error.keyValue) {
+    return new AppError(
+      "A duplicate value was detected. Please use a unique value.",
+      400,
+    );
+  }
+
   const field = Object.keys(error.keyValue)[0];
   const value = error.keyValue[field];
 
@@ -75,6 +83,18 @@ const errorMiddleware = (err, req, res, next) => {
   if (err.name === "ValidationError") {
     error = handleValidationError(err);
   }
+
+  // JWT Error Handlers
+  const handleJsonWebTokenError = (error) => {
+    const errorMessage = "Invalid access token. Please log in again.";
+    return new AppError(errorMessage, 401);
+  };
+
+  // Token Expired Error Handler
+  const handleTokenExpiredError = (error) => {
+    const errorMessage = "Your access token has expired. Please log in again.";
+    return new AppError(errorMessage, 401);
+  };
 
   // Default values
   error.statusCode = error.statusCode || 500;
