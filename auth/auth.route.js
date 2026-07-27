@@ -1,6 +1,8 @@
 const Router = require("express").Router;
 const studentMiddleware = require("../students/students.middleware");
 const authController = require("./auth.controller");
+const authMiddleware = require("./auth.middleware");
+const authValidation = require("./auth.validation");
 
 const authRouter = Router();
 
@@ -10,6 +12,16 @@ authRouter.post(
   studentMiddleware.validateCreateStudents,
   authController.signupController,
 );
+
+// LOGIN
 authRouter.post("/login", authController.loginController);
+
+// CHANGE PASSWORD
+authRouter.patch(
+  "/change-password",
+  authMiddleware.isAuthenticated,
+  authValidation.validateChangePassword,
+  authController.changePasswordController,
+);
 
 module.exports = authRouter;

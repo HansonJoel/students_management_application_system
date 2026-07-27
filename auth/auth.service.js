@@ -62,7 +62,37 @@ const login = async ({ email, password }) => {
   };
 };
 
+const changePassword = async (userId, { currentPassword, newPassword }) => {
+  // 1. Find the student and explicitly select the password
+  const student = await studentsModel.findById(userId).select("+password");
+
+  if (!student) {
+    throw new AppError("Student no longer exists.", 401);
+  }
+
+  // 2. Check if the current password is correct
+  const isPasswordCorrect = await student.comparePassword(currentPassword);
+
+  if (!isPasswordCorrect) {
+    throw new AppError("Your current password is incorrect.", 401);
+  }
+
+  // 3. Set the new password
+  student.password = newPassword;
+
+  // 4. Record when the password was changed
+  student.passwordChangedAt = new Date();
+
+  // 5. Save the student
+  // The pre-save middleware in students.model.js
+  // will automatically hash the new password
+  await student.save();
+
+  return student;
+};
+
 module.exports = {
   signup,
   login,
+  changePassword,
 };

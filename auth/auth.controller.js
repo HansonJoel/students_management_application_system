@@ -23,7 +23,16 @@ const loginController = catchAsync(async (req, res, next) => {
   });
 });
 
+// CHANGE PASSWORD
+const changePasswordController = catchAsync(async (req, res) => {
+  const student = await authService.changePassword(req.user._id, req.body);
+
+  return res.status(200).json({
+    message: "Password changed successfully.",
+  });
+});
 module.exports = {
   signupController,
   loginController,
+  changePasswordController,
 };
