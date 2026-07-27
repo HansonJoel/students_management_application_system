@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const departmentCodes = require("../config/departments");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 
 const studentSchema = new mongoose.Schema(
   {
@@ -83,6 +84,8 @@ const studentSchema = new mongoose.Schema(
       type: Date,
     },
     passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
   {
     timestamps: true,
@@ -123,4 +126,21 @@ studentSchema.methods.isPasswordChanged = function (tokenIssuedAt) {
   return false;
 };
 
+// Generate a password reset token
+studentSchema.methods.createPasswordResetToken = function () {
+  // Generate a random token
+  const resetToken = crypto.randomBytes(32).toString("hex");
+
+  // Hash the token before storing it in the database
+  this.passwordResetToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  // Token expires in 10 minutes
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+
+  // Return the unhashed token
+  return resetToken;
+};
 module.exports = mongoose.model("Student", studentSchema);

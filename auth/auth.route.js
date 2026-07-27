@@ -24,4 +24,17 @@ authRouter.patch(
   authController.changePasswordController,
 );
 
+// FORGOT PASSWORD
+authRouter.post(
+  "/forgot-password",
+  authValidation.validateForgotPassword,
+  authController.forgotPasswordController,
+);
+
+// RESET PASSWORD
+authRouter.patch(
+  "/reset-password/:token",
+  authValidation.validateResetPassword,
+  authController.resetPasswordController,
+);
 module.exports = authRouter;

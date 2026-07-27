@@ -31,8 +31,34 @@ const changePasswordController = catchAsync(async (req, res) => {
     message: "Password changed successfully.",
   });
 });
+
+// FORGOT PASSWORD
+const forgotPasswordController = catchAsync(async (req, res) => {
+  const resetToken = await authService.forgotPassword(req.body.email);
+
+  return res.status(200).json({
+    message: "Password reset token generated successfully.",
+    resetToken,
+  });
+});
+
+// RESET PASSWORD
+const resetPasswordController = catchAsync(async (req, res) => {
+  const response = await authService.resetPassword(
+    req.params.token,
+    req.body.newPassword,
+    req.body.confirmPassword,
+  );
+
+  return res.status(200).json({
+    message: "Password reset successfully. Please log in again.",
+  });
+});
+
 module.exports = {
   signupController,
   loginController,
   changePasswordController,
+  forgotPasswordController,
+  resetPasswordController,
 };
