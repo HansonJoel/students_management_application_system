@@ -33,12 +33,12 @@ const updateStudentController = catchAsync(async (req, res, next) => {
 });
 
 // Delete student
-const deleteStudentController = catchAsync(async (req, res, next) => {
+const deactivateStudentController = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const student = await studentService.deleteStudent(id);
 
   return res.status(200).json({
-    message: "Student deleted successfully",
+    message: "Student account deactivated successfully",
     // data: student,
   });
 });
@@ -68,7 +68,7 @@ module.exports = {
   createStudentController,
   createBulkStudentsController,
   updateStudentController,
-  deleteStudentController,
+  deactivateStudentController,
   getStudentController,
   getAllStudentsController,
 };

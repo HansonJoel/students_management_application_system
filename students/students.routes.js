@@ -50,7 +50,7 @@ studentRouter.delete(
   "/:id",
   authMiddleware.isAuthenticated,
   authMiddleware.restrictTo("admin"),
-  studentController.deleteStudentController,
+  studentController.deactivateStudentController,
 );
 
 module.exports = studentRouter;

@@ -88,11 +88,15 @@ const updateStudent = async (id, updateData) => {
 
 // The deleteStudent function deletes a student record from the database based on the provided ID
 const deleteStudent = async (id) => {
-  const student = await studentsModel.findByIdAndDelete(id);
+  const student = await studentsModel.findById(id);
 
   if (!student) {
     throw new AppError("Student not found", 404);
   }
+
+  student.isActive = false;
+
+  await student.save();
 
   return student;
 };
