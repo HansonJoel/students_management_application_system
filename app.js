@@ -6,6 +6,7 @@ const errorMiddleware = require("./middleware/error.middleware");
 const AppError = require("./utils/AppError");
 const studentRouter = require("./students/students.routes");
 const authRouter = require("./auth/auth.route");
+const adminRouter = require("./admins/admins.routes");
 
 // Middleware for parsing JSON bodies (highly recommended for POST/PATCH)
 app.use(morgan("dev"));
@@ -18,6 +19,7 @@ app.get("/", (req, res) => {
 //  register routes
 app.use("/v1/students", studentRouter);
 app.use("/v1/auth", authRouter);
+app.use("/v1/admins", adminRouter);
 
 // Unmatched routes
 app.use((req, res, next) => {

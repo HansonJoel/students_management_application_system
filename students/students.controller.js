@@ -24,7 +24,7 @@ const createBulkStudentsController = catchAsync(async (req, res, next) => {
 // UPDATE STUDENT
 const updateStudentController = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const student = await studentService.updateStudent(id, req.body);
+  const student = await studentService.updateStudent(id, req.body, req.user);
 
   return res.status(200).json({
     message: "Student updated successfully",
@@ -32,10 +32,10 @@ const updateStudentController = catchAsync(async (req, res, next) => {
   });
 });
 
-// Delete student
+// Deactivate student
 const deactivateStudentController = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const student = await studentService.deleteStudent(id);
+  const student = await studentService.deactivateStudent(id);
 
   return res.status(200).json({
     message: "Student account deactivated successfully",
@@ -46,7 +46,7 @@ const deactivateStudentController = catchAsync(async (req, res, next) => {
 // Get single student
 const getStudentController = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const student = await studentService.getStudent(id);
+  const student = await studentService.getStudent(id, req.user);
 
   return res.status(200).json({
     message: "Student retrieved successfully",

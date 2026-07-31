@@ -49,19 +49,26 @@ const studentSchema = new mongoose.Schema(
     department: {
       type: String,
       enum: Object.keys(departmentCodes),
+      required: function () {
+        return this.role === "student";
+      },
     },
 
     level: {
       type: String,
-      required: true,
       enum: ["100", "200", "300", "400", "500"],
+      required: function () {
+        return this.role === "student";
+      },
     },
 
+    // Student ID is only applicable to students.
+    // It is unique when it exists.
     studentId: {
       type: String,
-      unique: true,
       trim: true,
     },
+
     password: {
       type: String,
       required: true,
@@ -71,7 +78,7 @@ const studentSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["student", "admin"],
+      enum: ["student", "admin", "superAdmin"],
       default: "student",
     },
 
@@ -92,6 +99,22 @@ const studentSchema = new mongoose.Schema(
   },
 );
 
+// =========================================
+// INDEXES
+// =========================================
+
+// Student ID must be unique when it exists.
+// Admins and Super Admins don't need a studentId.
+studentSchema.index(
+  { studentId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      studentId: { $exists: true, $ne: null },
+    },
+  },
+);
+
 // Hashing the password before saving it to the database
 studentSchema.pre("save", async function () {
   // skip hashing if password is not modified
@@ -103,7 +126,15 @@ studentSchema.pre("save", async function () {
 });
 
 // Middleware to filter out inactive users from query results
-studentSchema.pre(/^find/, async function () {
+// studentSchema.pre(/^find/, async function () {
+//   this.find({ isActive: true });
+// });
+
+studentSchema.pre(/^find/, function () {
+  if (this.getOptions().includeInactive) {
+    return;
+  }
+
   this.find({ isActive: true });
 });
 

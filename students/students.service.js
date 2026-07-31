@@ -58,7 +58,15 @@ const createBulkStudents = async (students) => {
 };
 
 // The updateStudent function updates an existing student record based on the provided ID and new data
-const updateStudent = async (id, updateData) => {
+const updateStudent = async (id, updateData, currentUser) => {
+  // Students can only update their own record
+  if (currentUser.role === "student" && currentUser._id.toString() !== id) {
+    throw new AppError(
+      "You do not have permission to update this student's information.",
+      403,
+    );
+  }
+  // Find the student by ID
   const student = await studentsModel.findById(id);
 
   if (!student) {
@@ -86,8 +94,8 @@ const updateStudent = async (id, updateData) => {
   return student;
 };
 
-// The deleteStudent function deletes a student record from the database based on the provided ID
-const deleteStudent = async (id) => {
+// The deactivateStudent function deactivates a student record in the database based on the provided ID
+const deactivateStudent = async (id) => {
   const student = await studentsModel.findById(id);
 
   if (!student) {
@@ -102,7 +110,15 @@ const deleteStudent = async (id) => {
 };
 
 // The getStudent function retrieves a student record from the database based on the provided ID
-const getStudent = async (id) => {
+const getStudent = async (id, currentUser) => {
+  // Student can only access their own record
+  if (currentUser.role === "student" && currentUser._id.toString() !== id) {
+    throw new AppError(
+      "You do not have permission to access this student's information.",
+      403,
+    );
+  }
+
   const student = await studentsModel.findById(id);
 
   if (!student) {
@@ -189,7 +205,7 @@ module.exports = {
   createStudent,
   createBulkStudents,
   updateStudent,
-  deleteStudent,
+  deactivateStudent,
   getStudent,
   getAllStudents,
 };
