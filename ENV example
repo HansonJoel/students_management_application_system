@@ -1,6 +1,7 @@
+CLIENT_URL=http://localhost:3000
 PORT=3000
 MONGODB_URI=
-NODE_ENV=  either development or environment
+NODE_ENV=  either development or production
 JWT_SECRET=
 JWT_EXPIRES_IN=
 
@@ -13,3 +14,10 @@ SUPERADMIN_RECOVERY_EMAIL=recovery@example.com
 SUPERADMIN_DOB=1990-01-01
 SUPERADMIN_GENDER=male
 SUPERADMIN_TIMEZONE=Africa/Lagos
+
+SMTP_HOST=sandbox.smtp.mailtrap.io
+SMTP_PORT=2525
+SMTP_USERNAME=
+SMTP_PASSWORD=
+
+EMAIL_FROM="Student Management System <noreply@studentms.com>"
