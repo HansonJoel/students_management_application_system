@@ -7,11 +7,11 @@ const authValidation = require("./auth.validation");
 const authRouter = Router();
 
 // student self-registration route
-authRouter.post(
-  "/signup",
-  studentMiddleware.validateCreateStudents,
-  authController.signupController,
-);
+// authRouter.post(
+//   "/signup",
+//   studentMiddleware.validateCreateStudents,
+//   authController.signupController,
+// );
 
 // LOGIN
 authRouter.post("/login", authController.loginController);

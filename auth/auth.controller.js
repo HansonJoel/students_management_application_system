@@ -2,15 +2,15 @@ const authService = require("./auth.service");
 const catchAsync = require("../utils/catchAsync");
 
 // SIGNUP
-const signupController = catchAsync(async (req, res) => {
-  const response = await authService.signup(req.body);
+// const signupController = catchAsync(async (req, res) => {
+//   const response = await authService.signup(req.body);
 
-  return res.status(201).json({
-    message: "Student registered successfully",
-    token: response.token,
-    data: response.student,
-  });
-});
+//   return res.status(201).json({
+//     message: "Student registered successfully",
+//     token: response.token,
+//     data: response.student,
+//   });
+// });
 
 // LOGIN
 const loginController = catchAsync(async (req, res, next) => {
@@ -19,7 +19,7 @@ const loginController = catchAsync(async (req, res, next) => {
   return res.status(200).json({
     message: "Login successful",
     token: response.token,
-    data: response.student,
+    data: response.user,
   });
 });
 
@@ -34,12 +34,9 @@ const changePasswordController = catchAsync(async (req, res) => {
 
 // FORGOT PASSWORD
 const forgotPasswordController = catchAsync(async (req, res) => {
-  const resetToken = await authService.forgotPassword(req.body.email);
+  const response = await authService.forgotPassword(req.body.email);
 
-  return res.status(200).json({
-    message: "Password reset token generated successfully.",
-    resetToken,
-  });
+  return res.status(200).json(response);
 });
 
 // RESET PASSWORD
@@ -47,16 +44,16 @@ const resetPasswordController = catchAsync(async (req, res) => {
   const response = await authService.resetPassword(
     req.params.token,
     req.body.newPassword,
-    req.body.confirmPassword,
   );
 
   return res.status(200).json({
+    status: "success",
     message: "Password reset successfully. Please log in again.",
   });
 });
 
 module.exports = {
-  signupController,
+  // signupController,
   loginController,
   changePasswordController,
   forgotPasswordController,

@@ -1,4 +1,5 @@
 const studentsModel = require("./students.model");
+const User = require("../users/users.model");
 const generateStudentId = require("../utils/generateStudentId");
 const AppError = require("../utils/AppError");
 // Service functions for managing students
@@ -17,29 +18,46 @@ const createStudent = async ({
   level,
   password,
 }) => {
-  // Check if email already exists
-  const existingStudent = await studentsModel.findOne({ email });
+  // 1. Check whether the email already belongs to a User
+  const existingUser = await User.findOne({ email });
 
-  if (existingStudent) {
+  if (existingUser) {
     throw new AppError("Email already exists", 409);
   }
-  // Generate student ID based on department and current year
+
+  // 2. Generate the student's ID
   const studentId = await generateStudentId(department);
 
-  const student = await studentsModel.create({
-    firstName,
-    lastName,
+  // 3. Create the User account
+  const user = await User.create({
     email,
-    phone,
-    dateOfBirth,
-    gender,
-    department,
-    level,
-    studentId,
     password,
+    role: "student",
   });
 
-  return student;
+  try {
+    // 4. Create the Student profile
+    const student = await studentsModel.create({
+      user: user._id,
+      firstName,
+      lastName,
+      phone,
+      dateOfBirth,
+      gender,
+      department,
+      level,
+      studentId,
+    });
+
+    // 5. Return the Student profile
+    return student;
+  } catch (error) {
+    // If Student creation fails,
+    // remove the User account we just created.
+    await User.findByIdAndDelete(user._id);
+
+    throw error;
+  }
 };
 
 // ===============================

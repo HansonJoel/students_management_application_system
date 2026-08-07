@@ -64,6 +64,18 @@ const handleValidationError = (error) => {
   return new AppError(errorMessage, 400);
 };
 
+// JWT Error Handlers
+const handleJsonWebTokenError = (error) => {
+  const errorMessage = "Invalid access token. Please log in again.";
+  return new AppError(errorMessage, 401);
+};
+
+// JWT Expired Error Handler
+const handleTokenExpiredError = (error) => {
+  const errorMessage = "Your access token has expired. Please log in again.";
+  return new AppError(errorMessage, 401);
+};
+
 // Handling Global Error
 const errorMiddleware = (err, req, res, next) => {
   let error = err;
@@ -84,22 +96,21 @@ const errorMiddleware = (err, req, res, next) => {
     error = handleValidationError(err);
   }
 
-  // JWT Error Handlers
-  const handleJsonWebTokenError = (error) => {
-    const errorMessage = "Invalid access token. Please log in again.";
-    return new AppError(errorMessage, 401);
-  };
+  // JWT Error
+  if (err.name === "JsonWebTokenError") {
+    error = handleJsonWebTokenError(err);
+  }
 
-  // Token Expired Error Handler
-  const handleTokenExpiredError = (error) => {
-    const errorMessage = "Your access token has expired. Please log in again.";
-    return new AppError(errorMessage, 401);
-  };
+  // JWT Expired Error
+  if (err.name === "TokenExpiredError") {
+    error = handleTokenExpiredError(err);
+  }
 
   // Default values
   error.statusCode = error.statusCode || 500;
   error.status = error.status || "error";
 
+  //Environment-based error response
   if (process.env.NODE_ENV === "development") {
     return devError(res, error);
   } else {

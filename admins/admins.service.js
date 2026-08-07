@@ -1,6 +1,8 @@
-const studentsModel = require("../students/students.model");
+const User = require("../users/users.model");
+const Admin = require("./admins.model");
 const AppError = require("../utils/AppError");
 
+// Create a new administrator
 const createAdmin = async ({
   firstName,
   lastName,
@@ -10,45 +12,54 @@ const createAdmin = async ({
   gender,
   password,
 }) => {
-  // Check if email already exists
-  const existingUser = await studentsModel.findOne({ email });
+  // 1. Check whether the email is already registered
+  const existingUser = await User.findOne({ email });
 
   if (existingUser) {
     throw new AppError("A user with this email already exists.", 409);
   }
 
-  // Create admin
-  const admin = await studentsModel.create({
-    firstName,
-    lastName,
+  // 2. Create the authentication account
+  const user = await User.create({
     email,
-    phone,
-    dateOfBirth,
-    gender,
     password,
     role: "admin",
   });
 
+  // 3. Create the admin profile
+  const admin = await Admin.create({
+    user: user._id,
+    firstName,
+    lastName,
+    phone,
+    dateOfBirth,
+    gender,
+  });
+
+  // 4. Return the admin profile
   return admin;
 };
 
+
 // Get all administrators
 const getAllAdmins = async () => {
-  const admins = await studentsModel
-    .find({ role: "admin" })
-    .select("-password -passwordResetToken -passwordResetExpires");
+  const admins = await Admin.find().populate({
+    path: "user",
+    select: "email role isActive lastLogin",
+  });
 
   return admins;
 };
 
 // Get a single administrator
 const getAdmin = async (id) => {
-  const admin = await studentsModel
-    .findOne({ _id: id, role: "admin" })
-    .select("-password -passwordResetToken -passwordResetExpires");
+  const admin = await Admin.findById(id).populate({
+    path: "user",
+    select: "email role isActive lastLogin",
+  });
 
   if (!admin) {
-    throw new AppError("Administrator not found", 404);
+    throw new AppError("Administrator not found.", 404);
   }
 
   return admin;
@@ -56,20 +67,15 @@ const getAdmin = async (id) => {
 
 // Update an administrator
 const updateAdmin = async (id, updateData) => {
-  const admin = await studentsModel.findOne({
-    _id: id,
-    role: "admin",
-  });
+  const admin = await Admin.findById(id);
 
   if (!admin) {
-    throw new AppError("Administrator not found", 404);
+    throw new AppError("Administrator not found.", 404);
   }
 
-  // Fields a Super Admin is allowed to update
   const allowedFields = [
     "firstName",
     "lastName",
-    "email",
     "phone",
     "dateOfBirth",
     "gender",
@@ -83,69 +89,72 @@ const updateAdmin = async (id, updateData) => {
 
   await admin.save();
 
-  // Don't return sensitive information
-  admin.password = undefined;
-  admin.passwordResetToken = undefined;
-  admin.passwordResetExpires = undefined;
-
   return admin;
 };
 
 // Deactivate an administrator
 const deactivateAdmin = async (id) => {
-  const admin = await studentsModel.findOne({
-    _id: id,
-    role: "admin",
-  });
-
-  if (!admin) {
-    throw new AppError("Administrator not found", 404);
-  }
-
-  // Check if already inactive
-  if (!admin.isActive) {
-    throw new AppError("Administrator is already deactivated.", 400);
-  }
-
-  admin.isActive = false;
-
-  await admin.save();
-
-  return admin;
-};
-
-// Reactivate an administrator
-// IMPORTANT:
-// Your schema has a pre(/^find/) middleware that automatically
-// filters out isActive: false.
-//
-// Therefore, findOne() cannot find an inactive admin.
-//
-// We use findOne({ ..., isActive: false }) but your middleware
-// would still add isActive: true.
-const reactivateAdmin = async (id) => {
-  const admin = await studentsModel
-    .findOne({
-      _id: id,
-      role: "admin",
-    })
-    .setOptions({ includeInactive: true });
+  const admin = await Admin.findById(id);
 
   if (!admin) {
     throw new AppError("Administrator not found.", 404);
   }
 
-  if (admin.isActive) {
+  const user = await User.findById(admin.user);
+
+  if (!user) {
+    throw new AppError(
+      "User account associated with this administrator was not found.",
+      404,
+    );
+  }
+
+  if (!user.isActive) {
+    throw new AppError("Administrator is already deactivated.", 400);
+  }
+
+  user.isActive = false;
+
+  await user.save();
+
+  return {
+    admin,
+    user,
+  };
+};
+
+// Reactivate an administrator
+const reactivateAdmin = async (id) => {
+  const admin = await Admin.findById(id);
+
+  if (!admin) {
+    throw new AppError("Administrator not found.", 404);
+  }
+
+  const user = await User.findById(admin.user).setOptions({
+    includeInactive: true,
+  });
+
+  if (!user) {
+    throw new AppError(
+      "User account associated with this administrator was not found.",
+      404,
+    );
+  }
+
+  if (user.isActive) {
     throw new AppError("Administrator is already active.", 400);
   }
 
-  admin.isActive = true;
+  user.isActive = true;
 
-  await admin.save();
+  await user.save();
 
-  return admin;
+  return {
+    admin,
+    user,
+  };
 };
-
 module.exports = {
   createAdmin,
   getAllAdmins,

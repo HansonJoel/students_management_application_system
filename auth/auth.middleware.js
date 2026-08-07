@@ -1,12 +1,12 @@
 const jwt = require("jsonwebtoken");
-const Student = require("../students/students.model");
+const User = require("../users/users.model");
 const catchAsync = require("../utils/catchAsync");
-const AppError = require("../utils/appError");
+const AppError = require("../utils/AppError");
 
 const isAuthenticated = catchAsync(async (req, res, next) => {
   let token;
 
-  // Check Authorization header
+  // 1. Check Authorization header
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
@@ -18,30 +18,30 @@ const isAuthenticated = catchAsync(async (req, res, next) => {
     throw new AppError("You are not logged in. Please log in first.", 401);
   }
 
-  // Verify token
+  // 2. Verify token
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-  // check if the user still exists in the database
-  const student = await Student.findById(decoded.id);
+  // 3. Check if the user still exists in the database
+  const user = await User.findById(decoded.id);
 
-  if (!student) {
-    throw new AppError("Student no longer exists.", 401);
+  if (!user) {
+    throw new AppError("User no longer exists.", 401);
   }
 
-  // Check if account is active
-  if (!student.isActive) {
+  // 4. Check if account is active
+  if (!user.isActive) {
     throw new AppError("Your account has been deactivated.", 403);
   }
 
-  // Check if password was changed after the token was issued
-  const passwordChanged = student.isPasswordChanged(decoded.iat);
+  // 5. Check if password was changed after the token was issued
+  const passwordChanged = user.isPasswordChanged(decoded.iat);
 
   if (passwordChanged) {
     throw new AppError("Password changed recently. Please login again.", 401);
   }
 
   // Attach user to request
-  req.user = student;
+  req.user = user;
 
   next();
 });
